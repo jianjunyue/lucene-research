@@ -45,8 +45,8 @@ public class IndexFilesTest
 		}
         System.out.println( "Hello World!" );
     }
-    
-    private static String indexPath="/Users/eleme/data/research/index/test";
+
+	private static String indexPath = "/data/research/index/test";
     
     private static void IndexFiles() throws IOException {
     	 Path file=Paths.get(indexPath);
