@@ -1,8 +1,9 @@
-package org.lucene.research.test;
+package org.lucene.research.test.defStoredField.test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 import org.apache.lucene.document.Document;
@@ -19,6 +20,10 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 //import org.apache.lucene.search.term
 
+import org.apache.lucene.util.BytesRef;
+import org.lucene.research.test.defStoredField.StoredFieldDef;
+import org.lucene.research.test.defStoredField.Vertex;
+
 
 public class SearchTest {
 
@@ -28,42 +33,33 @@ public class SearchTest {
 	}
 
 
-	private static String indexPath = "D:\\data\\index\\test";
+	private static String indexPath = "D:\\data\\index\\deftest";
 
 	private static void search() {
 		Path file = Paths.get(indexPath);
 		IndexReader reader;
 		try {
-			reader = DirectoryReader.open(FSDirectory.open(file));
-//			IndexSearcher searcher = new IndexSearcher(reader);
-			IndexSearcher searcher =  newFixedThreadSearcher(reader,50);
-		    Sort sort = new Sort(new SortField("sortname",SortField.Type.LONG,false));
-//		    Sort sort = new Sort(new SortField[]{new SortField("sortname", SortField.Type.INT, true)});
-//		    sort = new Sort(new SortField("groupname",SortField.Type.STRING,true));
-
-		    //group 
-//		      sort = Sort.RELEVANCE;
-//		    new TermAllGroupsCollector(groupField);
-		    
-//			Query query = new TermQuery(new Term("name", "tian"));
-			Query query = new TermQuery(new Term("name", "上海"));
-//			Query query = new TermQuery(new Term("name", "beijing"));
-
-//			TopDocs results = searcher.search(query, 5000,sort);
+			reader = DirectoryReader.open(FSDirectory.open(file)); 
+			IndexSearcher searcher =  newFixedThreadSearcher(reader,50); 
+			Query query = new TermQuery(new Term("name", "上海")); 
 			TopDocs results = searcher.search(query, 5000);
 			ScoreDoc[] hits = results.scoreDocs;
 			System.out.println(hits.length);
 			for (ScoreDoc hit : hits) {
-				Document doc = searcher.doc(hit.doc);
-//				System.out.println(doc.get("sortname")+" , "+doc.get("groupname"));
-				 
-				System.out.println(doc.get("id")+" , "+doc.get("name") +" , "+doc.get("sortvalue")+" , "+doc.get("groupvalue"));
+				Document doc = searcher.doc(hit.doc);  
+				getVertexs(doc.getBinaryValue("defvar"));
+				System.out.println(doc.get("id")+" , "+doc.get("name") +" , "+doc.get("defvar")+" , "+doc.getBinaryValue("defvar"));
 			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void getVertexs(BytesRef ref) {
+		  List<Vertex> vertices = StoredFieldDef.getVerticesFromVerticesStoredField(ref);
+		  System.out.println(vertices.get(0).getPolyX());
 	}
 	
 	private static IndexSearcher newFixedThreadSearcher(IndexReader r, int nThreads) {

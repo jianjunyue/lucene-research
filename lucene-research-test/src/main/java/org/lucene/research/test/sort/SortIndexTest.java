@@ -1,4 +1,4 @@
-package org.lucene.research.test;
+package org.lucene.research.test.sort;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.BinaryDocValuesField;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericDocValuesField;
@@ -21,7 +22,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 
-public class IndexTest {
+public class SortIndexTest {
 
 	public static void main(String[] args) {
 		try {
@@ -43,47 +44,31 @@ public class IndexTest {
 		IndexWriterConfig iwc = new IndexWriterConfig(analyzer); 
 		writer = new IndexWriter(dir, iwc);
 
-//		indexDoc("1", "上海", "1111", "shanghai1");
-//		indexDoc("2", "上海", "12", "shanghai2");
-//		indexDoc("3", "上海", "313", "shanghai3");
-//		indexDoc("4", "上海", "114", "shanghai4");
-//		indexDoc("5", "北京", "225", "beijing1");
-//		indexDoc("6", "北京", "226", "beijing2");
-//		indexDoc("7", "北京", "227", "beijing3");
-//		indexDoc("8", "北京", "228", "beijing4");
-		
-		for(int i=0;i<1000000;i++) { 
-			if(i%100000==0) {
-			indexDoc(""+i, "上海" , ""+i, "beijing4");
-			}else {
-				indexDoc(""+i, "北京" , ""+i, "beijing4");
-			}
-		}
-		
-//		updateDocument();
+		indexDoc("1", "上海", "1,1" );
+		indexDoc("2", "上海", "1,2" );
+		indexDoc("3", "上海", "3,13" );
+		indexDoc("4", "上海", "1,14" );
+		indexDoc("5", "北京", "2,25" );
+		indexDoc("6", "北京", "2,26" );
+		indexDoc("7", "北京", "2,27" );
+		indexDoc("8", "北京", "2,8" ); 
 		writer.commit();
 		writer.forceMerge(5);
 		writer.close();
 	}
 
-	private static void indexDoc(String id, String name,  String sortname, String groupname) throws IOException {
-		Document doc = new Document();
-		sortname=id;
+	private static void indexDoc(String id, String name,  String xy ) throws IOException {
+		Document doc = new Document(); 	
 		Field id_field = new StringField("id", id, Store.YES);
 		Field name_field = new StringField("name", name, Store.YES);// StringField
-		Field sort_field = new NumericDocValuesField("sortname", Long.parseLong(sortname));
-		Field group_field = new SortedDocValuesField("groupname", new BytesRef(groupname));// 分组统计
+		Field sort_field = new SortedDocValuesField("location", new BytesRef(xy.getBytes())); 
 
-		Field sortvalue_field = new StringField("sortvalue", sortname, Store.YES);
-		Field namevalue_field = new StringField("groupvalue", groupname, Store.YES);
-		
+		Field sortvalue_field = new StringField("sortvalue", xy, Store.YES); 
 		doc.add(id_field);
 		doc.add(name_field); 
-		doc.add(sort_field);
-		doc.add(group_field);
+		doc.add(sort_field); 
 
-		doc.add(sortvalue_field);
-		doc.add(namevalue_field);
+		doc.add(sortvalue_field); 
 
 		writer.addDocument(doc);
 	}

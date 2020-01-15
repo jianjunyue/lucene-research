@@ -9,5 +9,7 @@
   <description>lucene-research</description>
   <modules>
     <module>lucene-research-test</module>
+    <module>lucene-research-vectors</module>
+    <module>lucene-research-sort</module>
   </modules>
 </project>

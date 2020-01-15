@@ -1,10 +1,12 @@
-package org.lucene.research.test;
+package org.lucene.research.test.defStoredField.test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -20,6 +22,8 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
+import org.lucene.research.test.defStoredField.StoredFieldDef;
+import org.lucene.research.test.defStoredField.Vertex;
 
 public class IndexTest {
 
@@ -32,7 +36,7 @@ public class IndexTest {
 		System.out.println("Hello World!");
 	}
 
-	private static String indexPath = "D:\\data\\index\\test";
+	private static String indexPath = "D:\\data\\index\\deftest";
 	private static IndexWriter writer;
 	private static Path file;
 
@@ -42,23 +46,19 @@ public class IndexTest {
 		Analyzer analyzer = new StandardAnalyzer();
 		IndexWriterConfig iwc = new IndexWriterConfig(analyzer); 
 		writer = new IndexWriter(dir, iwc);
-
-//		indexDoc("1", "上海", "1111", "shanghai1");
-//		indexDoc("2", "上海", "12", "shanghai2");
-//		indexDoc("3", "上海", "313", "shanghai3");
-//		indexDoc("4", "上海", "114", "shanghai4");
-//		indexDoc("5", "北京", "225", "beijing1");
-//		indexDoc("6", "北京", "226", "beijing2");
-//		indexDoc("7", "北京", "227", "beijing3");
-//		indexDoc("8", "北京", "228", "beijing4");
 		
-		for(int i=0;i<1000000;i++) { 
-			if(i%100000==0) {
-			indexDoc(""+i, "上海" , ""+i, "beijing4");
-			}else {
-				indexDoc(""+i, "北京" , ""+i, "beijing4");
-			}
-		}
+		List<Vertex> vertices = new ArrayList<Vertex>();
+		Vertex ver1 = new Vertex(121.11f, 32.11f);
+		vertices.add(ver1);
+
+		Vertex ver2 = new Vertex(131.11f, 52.11f);
+		vertices.add(ver2);
+
+		Vertex ver3 = new Vertex(31.11f, 52.11f);
+		vertices.add(ver3);
+
+		indexDoc("1", "上海",vertices); 
+ 
 		
 //		updateDocument();
 		writer.commit();
@@ -66,24 +66,15 @@ public class IndexTest {
 		writer.close();
 	}
 
-	private static void indexDoc(String id, String name,  String sortname, String groupname) throws IOException {
-		Document doc = new Document();
-		sortname=id;
+	private static void indexDoc(String id, String name,  List<Vertex> vertices) throws IOException {
+		Document doc = new Document(); 
 		Field id_field = new StringField("id", id, Store.YES);
 		Field name_field = new StringField("name", name, Store.YES);// StringField
-		Field sort_field = new NumericDocValuesField("sortname", Long.parseLong(sortname));
-		Field group_field = new SortedDocValuesField("groupname", new BytesRef(groupname));// 分组统计
-
-		Field sortvalue_field = new StringField("sortvalue", sortname, Store.YES);
-		Field namevalue_field = new StringField("groupvalue", groupname, Store.YES);
+		Field defvar_field = StoredFieldDef.createVerticesFiled("defvar", vertices);
 		
 		doc.add(id_field);
 		doc.add(name_field); 
-		doc.add(sort_field);
-		doc.add(group_field);
-
-		doc.add(sortvalue_field);
-		doc.add(namevalue_field);
+		doc.add(defvar_field); 
 
 		writer.addDocument(doc);
 	}

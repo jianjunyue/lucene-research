@@ -1,4 +1,4 @@
-package org.lucene.research.test;
+package org.lucene.research.test.sort;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -20,7 +20,7 @@ import org.apache.lucene.store.FSDirectory;
 //import org.apache.lucene.search.term
 
 
-public class SearchTest {
+public class SortSearchTest {
 
 	public static void main(String[] args) {
 		search();
@@ -36,11 +36,11 @@ public class SearchTest {
 		try {
 			reader = DirectoryReader.open(FSDirectory.open(file));
 //			IndexSearcher searcher = new IndexSearcher(reader);
-			IndexSearcher searcher =  newFixedThreadSearcher(reader,50);
-		    Sort sort = new Sort(new SortField("sortname",SortField.Type.LONG,false));
+			IndexSearcher searcher =  newFixedThreadSearcher(reader,5);
+		    Sort sort = new Sort(new SortField("sortname",SortField.Type.STRING,false));
 //		    Sort sort = new Sort(new SortField[]{new SortField("sortname", SortField.Type.INT, true)});
 //		    sort = new Sort(new SortField("groupname",SortField.Type.STRING,true));
-
+//		    Sort sort = new Sort(new SortField("location",new DistanceComparatorSource(10, 10)));
 		    //group 
 //		      sort = Sort.RELEVANCE;
 //		    new TermAllGroupsCollector(groupField);
@@ -48,11 +48,9 @@ public class SearchTest {
 //			Query query = new TermQuery(new Term("name", "tian"));
 			Query query = new TermQuery(new Term("name", "上海"));
 //			Query query = new TermQuery(new Term("name", "beijing"));
-
-//			TopDocs results = searcher.search(query, 5000,sort);
-			TopDocs results = searcher.search(query, 5000);
+			
+			TopDocs results = searcher.search(query, 5,sort);
 			ScoreDoc[] hits = results.scoreDocs;
-			System.out.println(hits.length);
 			for (ScoreDoc hit : hits) {
 				Document doc = searcher.doc(hit.doc);
 //				System.out.println(doc.get("sortname")+" , "+doc.get("groupname"));
@@ -67,8 +65,8 @@ public class SearchTest {
 	}
 	
 	private static IndexSearcher newFixedThreadSearcher(IndexReader r, int nThreads) {
-        return new IndexSearcher(r.getContext(), Executors.newFixedThreadPool(nThreads));
-//        return new IndexSearcher(r.getContext());
+//        return new IndexSearcher(r.getContext(), Executors.newFixedThreadPool(nThreads));
+        return new IndexSearcher(r.getContext());
     }
 
 	/**
